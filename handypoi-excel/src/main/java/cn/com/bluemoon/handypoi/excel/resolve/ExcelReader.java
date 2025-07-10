@@ -7,14 +7,25 @@ import cn.com.bluemoon.handypoi.excel.model.Style;
 import cn.com.bluemoon.handypoi.excel.utils.ConvertUtils;
 import cn.com.bluemoon.handypoi.excel.utils.StyleUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -133,7 +144,15 @@ public class ExcelReader<T> {
                                 Field beanField = beanColumnField.getField();
                                 Object beanValue;
                                 if (beanField.getType() == String.class) {
-                                    beanValue = cell.getStringCellValue();
+                                    if (cell.getCellTypeEnum() == CellType.NUMERIC) {
+                                        if (cell instanceof XSSFCell) {
+                                            beanValue = ((XSSFCell) cell).getRawValue();
+                                        } else {
+                                            beanValue = cell.getStringCellValue();
+                                        }
+                                    } else {
+                                        beanValue = cell.getStringCellValue();
+                                    }
                                 } else if (Number.class.isAssignableFrom(beanField.getType())) {
                                     beanValue = ConvertUtils.numberType(beanField.getType(), cell);
                                 } else if (beanField.getType().isPrimitive()) {
